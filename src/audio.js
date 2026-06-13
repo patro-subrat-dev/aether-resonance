@@ -49,6 +49,14 @@ class AudioEngine {
       1567.98, // G6
       1760.00  // A6
     ];
+
+    this.scaleNames = [
+      'A2', 'C3', 'D3', 'E3', 'G3',
+      'A3', 'C4', 'D4', 'E4', 'G4',
+      'A4', 'C5', 'D5', 'E5', 'G5',
+      'A5', 'C6', 'D6', 'E6', 'G6',
+      'A6'
+    ];
   }
 
   // Initialize Web Audio context (must be called from a user interaction)
@@ -132,6 +140,25 @@ class AudioEngine {
   // Play a synth note
   triggerNote(normalizedValue, pan = 0.0) {
     if (!this.ctx || this.params.muted) return;
+
+    // Update active note HUD readout
+    const noteVal = 1.0 - normalizedValue;
+    const noteIndex = Math.floor(noteVal * this.scale.length);
+    const clampedNoteIndex = Math.max(0, Math.min(this.scale.length - 1, noteIndex));
+    const noteName = this.scaleNames[clampedNoteIndex];
+
+    const noteEl = document.getElementById('note-val');
+    if (noteEl) {
+      noteEl.textContent = noteName;
+      noteEl.style.transition = 'none';
+      noteEl.style.color = 'var(--neon-magenta)';
+      noteEl.style.textShadow = '0 0 10px var(--neon-magenta)';
+      setTimeout(() => {
+        noteEl.style.transition = 'color 0.4s ease, text-shadow 0.4s ease';
+        noteEl.style.color = 'var(--neon-yellow)';
+        noteEl.style.textShadow = 'none';
+      }, 40);
+    }
     
     // Resume audio context if suspended
     if (this.ctx.state === 'suspended') {

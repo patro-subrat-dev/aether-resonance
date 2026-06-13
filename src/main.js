@@ -80,6 +80,7 @@ let dragOffset = { x: 0, y: 0 };
 let dragStartMidpoint = { x: 0, y: 0 };
 let elementCounter = 0;
 let isCoreInitialized = false;
+let lastMousePos = { x: window.innerWidth / 2, y: window.innerHeight / 2 };
 
 // FPS tracking variables
 let lastTime = performance.now();
@@ -505,6 +506,8 @@ canvas.addEventListener('pointerdown', (e) => {
 canvas.addEventListener('pointermove', (e) => {
   if (!isCoreInitialized) return;
   const coords = getMouseCoords(e);
+  lastMousePos.x = coords.x;
+  lastMousePos.y = coords.y;
 
   // Handle hovered styling
   if (activeTool === 'select') {
@@ -706,6 +709,65 @@ function drawGrid() {
     }
   }
 }
+
+// Keyboard Shortcuts & Particle Bursts
+window.addEventListener('keydown', (e) => {
+  if (!isCoreInitialized) return;
+
+  const key = e.key.toLowerCase();
+  
+  // Ignore keypresses if the target is an input (excluding sliders)
+  if (e.target.tagName === 'INPUT' && e.target.type !== 'range') return;
+
+  // Tool Selection
+  if (key === 's') {
+    tools.select.click();
+  } else if (key === 'b') {
+    tools.bouncer.click();
+  } else if (key === 'g') {
+    tools.well.click();
+  } else if (key === 'e') {
+    tools.emitter.click();
+  } else if (key === 'w') {
+    tools.wall.click();
+  }
+  
+  // Presets Selection
+  else if (key === '1') {
+    presets.rave.click();
+  } else if (key === '2') {
+    presets.space.click();
+  } else if (key === '3') {
+    presets.trap.click();
+  } else if (key === '4') {
+    presets.chaos.click();
+  }
+  
+  // Mute toggle
+  else if (key === 'm') {
+    btnMute.click();
+  }
+  
+  // Clear canvas (Backspace or Delete)
+  else if (e.key === 'Backspace' || e.key === 'Delete') {
+    btnClear.click();
+  }
+  
+  // Particle explosion burst at mouse pointer (Spacebar)
+  else if (e.code === 'Space') {
+    e.preventDefault();
+    const particleCount = 28;
+    const baseHue = Math.floor(Math.random() * 360);
+    for (let i = 0; i < particleCount; i++) {
+      const angle = (i / particleCount) * Math.PI * 2 + (Math.random() * 0.25 - 0.125);
+      const speed = 90 + Math.random() * 130;
+      const vx = Math.cos(angle) * speed;
+      const vy = Math.sin(angle) * speed;
+      physics.addParticle(lastMousePos.x, lastMousePos.y, vx, vy, baseHue);
+    }
+    haptics.trigger('node-hit-heavy');
+  }
+});
 
 // Start frame animations
 requestAnimationFrame(animate);

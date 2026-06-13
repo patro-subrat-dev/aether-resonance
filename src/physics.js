@@ -38,13 +38,17 @@ export class Particle {
   }
 
   draw(ctx) {
+    // Dynamically calculate hue based on remaining life (shifts color over time)
+    const startHue = parseInt(this.color) || 180;
+    const currentHue = (startHue + (1.0 - this.life) * 125) % 360;
+
     if (this.history.length > 1) {
       ctx.beginPath();
       ctx.moveTo(this.history[0].x, this.history[0].y);
       for (let i = 1; i < this.history.length; i++) {
         ctx.lineTo(this.history[i].x, this.history[i].y);
       }
-      ctx.strokeStyle = `hsla(${this.color}, 90%, 60%, ${this.life * 0.4})`;
+      ctx.strokeStyle = `hsla(${currentHue}, 95%, 60%, ${this.life * 0.45})`;
       ctx.lineWidth = this.radius * 1.5;
       ctx.stroke();
     }
@@ -52,9 +56,9 @@ export class Particle {
     // Draw particle head
     ctx.beginPath();
     ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
-    ctx.fillStyle = `hsla(${this.color}, 100%, 70%, ${this.life})`;
+    ctx.fillStyle = `hsla(${currentHue}, 100%, 75%, ${this.life})`;
     ctx.shadowBlur = 10;
-    ctx.shadowColor = `hsl(${this.color}, 100%, 60%)`;
+    ctx.shadowColor = `hsl(${currentHue}, 100%, 60%)`;
     ctx.fill();
     ctx.shadowBlur = 0; // reset
   }
