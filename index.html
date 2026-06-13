@@ -1,0 +1,254 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Aether Resonance v2.06 // Cyberpunk Synth Sandbox</title>
+    <!-- Favicon setting -->
+    <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2290%22>⚡</text></svg>" />
+    <script type="module" crossorigin src="/aether-resonance/assets/index-A5kqCAC_.js"></script>
+    <link rel="stylesheet" crossorigin href="/aether-resonance/assets/index-D4RnSNGp.css">
+  </head>
+  <body>
+    <!-- Fullscreen Interactive Canvas -->
+    <canvas id="canvas"></canvas>
+
+    <!-- CRT monitor screen overlays -->
+    <div id="crt-overlay"></div>
+    <div id="scanline-sweeper"></div>
+
+    <!-- Mobile sidebar toggle -->
+    <div id="mobile-toggle" class="hud-interactive">☰</div>
+
+    <!-- Info modal trigger -->
+    <div id="info-trigger" class="hud-interactive">?</div>
+
+    <!-- Main HUD App Interface -->
+    <div id="app">
+      <!-- Left Configuration Deck -->
+      <aside id="hud-sidebar" class="hud-interactive">
+        <header id="hud-header">
+          <h1 class="glitch-title">AETHER RESONANCE</h1>
+          <div class="system-status">
+            <span class="status-dot"></span>
+            <span>COGNITIVE ENGINE ACTIVE // v2.06</span>
+          </div>
+        </header>
+
+        <div class="deck-scroll">
+          <!-- Active Tools Selector -->
+          <section class="hud-section">
+            <h3>Simulation Tools</h3>
+            <div class="tool-grid">
+              <button id="tool-select" class="btn-tool active">
+                <span class="icon-label">⬈</span> Select / Drag
+              </button>
+              <button id="tool-bouncer" class="btn-tool">
+                <span class="icon-label">◯</span> Synth Node
+              </button>
+              <button id="tool-well" class="btn-tool">
+                <span class="icon-label">🌀</span> Gravity Well
+              </button>
+              <button id="tool-emitter" class="btn-tool">
+                <span class="icon-label">🚀</span> Emitter
+              </button>
+              <button id="tool-wall" class="btn-tool" style="grid-column: span 2;">
+                <span class="icon-label">╱</span> Draw Deflector Wall
+              </button>
+            </div>
+          </section>
+
+          <!-- Audio Engine Deck -->
+          <section class="hud-section">
+            <h3>Acoustic Synthesizer</h3>
+            <div class="slider-group">
+              <label class="slider-label"><span>Waveform Engine</span></label>
+              <select id="synth-wave" class="hud-select">
+                <option value="triangle">TRIANGLE (Mellow Pad)</option>
+                <option value="sine">SINE (Clean Sub)</option>
+                <option value="sawtooth">SAWTOOTH (Retro Lead)</option>
+                <option value="square">SQUARE (Digital Lead)</option>
+              </select>
+            </div>
+            
+            <div class="slider-group">
+              <div class="slider-label"><span>Filter Cutoff</span><span id="val-cutoff" class="slider-val">1200Hz</span></div>
+              <input type="range" id="param-cutoff" min="200" max="5000" step="50" value="1200" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Resonance (Q)</span><span id="val-q" class="slider-val">4</span></div>
+              <input type="range" id="param-q" min="1" max="15" step="0.5" value="4" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Decay Envelope</span><span id="val-decay" class="slider-val">0.15s</span></div>
+              <input type="range" id="param-decay" min="0.05" max="0.80" step="0.05" value="0.15" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Delay Feedback</span><span id="val-feedback" class="slider-val">40%</span></div>
+              <input type="range" id="param-feedback" min="0" max="85" step="5" value="40" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Reverb Space</span><span id="val-reverb" class="slider-val">30%</span></div>
+              <input type="range" id="param-reverb" min="0" max="80" step="5" value="30" />
+            </div>
+          </section>
+
+          <!-- Vector Physics Deck -->
+          <section class="hud-section">
+            <h3>Physics Engine</h3>
+            <div class="slider-group">
+              <div class="slider-label"><span>Gravity Force</span><span id="val-gravity" class="slider-val">120 px/s²</span></div>
+              <input type="range" id="param-gravity" min="-200" max="400" step="10" value="120" />
+            </div>
+
+            <div class="slider-group">
+              <div class="slider-label"><span>Air Resistance</span><span id="val-friction" class="slider-val">1.0%</span></div>
+              <input type="range" id="param-friction" min="0" max="10" step="0.5" value="1.0" />
+            </div>
+          </section>
+
+          <!-- Preset Matrix -->
+          <section class="hud-section">
+            <h3>Preset Matrices</h3>
+            <div class="preset-grid">
+              <button id="preset-rave" class="btn-preset">NEON RAVE</button>
+              <button id="preset-space" class="btn-preset">SPACE DRIFT</button>
+              <button id="preset-trap" class="btn-preset">GRAVITY TRAP</button>
+              <button id="preset-chaos" class="btn-preset">CHAOS GATE</button>
+            </div>
+          </section>
+
+          <!-- Tactile Haptics Switchers -->
+          <section class="hud-section">
+            <h3>Sensory Channels</h3>
+            <div class="toggle-group">
+              <label>Tactile Vibrations</label>
+              <label class="switch">
+                <input type="checkbox" id="toggle-vibration" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <div class="toggle-group">
+              <label>Visual Glitch Feedback</label>
+              <label class="switch">
+                <input type="checkbox" id="toggle-glitches" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+            <div class="toggle-group">
+              <label>Auditory Sub-Thuds</label>
+              <label class="switch">
+                <input type="checkbox" id="toggle-thuds" checked>
+                <span class="slider-switch"></span>
+              </label>
+            </div>
+          </section>
+        </div>
+
+        <footer class="hud-footer">
+          <button id="btn-clear" class="btn-danger">FORMAT ALL</button>
+          <button id="btn-mute" class="btn-standard">MUTE SOUND</button>
+        </footer>
+      </aside>
+
+      <!-- Right Analytics Overlay -->
+      <main id="hud-right">
+        <!-- Live Readouts Panel -->
+        <div class="hud-panel hud-interactive">
+          <h4>Live Telemetry</h4>
+          <div class="readout-row">
+            <span class="readout-label">Engine FPS</span>
+            <span id="fps-val" class="readout-val">--</span>
+          </div>
+          <div class="readout-row">
+            <span class="readout-label">Aether Particles</span>
+            <span id="particles-val" class="readout-val">0 / 300</span>
+          </div>
+          <div class="readout-row">
+            <span class="readout-label">Nodes Triggered</span>
+            <span id="triggers-val" class="readout-val">0</span>
+          </div>
+          <div class="readout-row">
+            <span class="readout-label">Spatial Elements</span>
+            <span id="elements-val" class="readout-val">0</span>
+          </div>
+        </div>
+
+        <!-- Instructions Panel -->
+        <div class="hud-panel hud-interactive">
+          <h4>Command Directives</h4>
+          <ul class="instructions-list">
+            <li>Select a tool from the left panel.</li>
+            <li>Click or drag on the canvas to place nodes.</li>
+            <li>Use the <b>Select / Drag</b> tool to move placed nodes.</li>
+            <li>Double-click a node to delete it.</li>
+            <li>Double-click a Gravity Well to toggle attract/repel mode.</li>
+          </ul>
+        </div>
+      </main>
+    </div>
+
+    <!-- Core Initialization Screen Overlay (Audio Permission bypass) -->
+    <div id="init-overlay">
+      <div class="boot-terminal">
+        <div class="terminal-header">
+          <div class="terminal-dots">
+            <span class="dot-red"></span>
+            <span class="dot-yellow"></span>
+            <span class="dot-cyan"></span>
+          </div>
+          <div class="terminal-title">SYSTEMS_CONTROL_DECK_V2.06</div>
+        </div>
+        <div class="terminal-body">
+          <div class="terminal-grid">
+            <!-- Left Side: Diagnostics and Boot -->
+            <div class="terminal-col-left">
+              <div class="terminal-text">
+                &gt; INITIALIZING COGNITIVE INTERFACE...<br>
+                &gt; ASSEMBLING WEB AUDIO SYNTHESIZER...<br>
+                &gt; CONSTRUCTING VECTOR PARTICLE ENGINE [OK]<br>
+                &gt; STATUS: <span class="highlight-cyan">ONLINE (STANDBY)</span>
+              </div>
+              <div class="terminal-text" style="margin-top: 16px;">
+                Welcome to <span class="highlight-magenta">Aether Resonance</span>, It combines high-frequency vector particle physics with a real-time synthesiser soundscape.
+              </div>
+              <button id="btn-boot-core" class="btn-boot" style="margin-top: 20px;">INITIALIZE CORE</button>
+            </div>
+            
+            <!-- Right Side: Tech Specs -->
+            <div class="terminal-col-right">
+              <h3 class="specs-title">System Specifications</h3>
+              <ul class="specs-list">
+                <li><strong>Web Audio Engine:</strong> Synthesizes real-time sound waves mapped to an always-harmonious A-minor pentatonic scale. Routes through custom delay feedback and synthetic reverb.</li>
+                <li><strong>2D Vector Physics:</strong> High-performance HTML5 Canvas render loop simulating elastic circle collisions, line deflection, and gravitational orbital pull.</li>
+                <li><strong>Sensory Channels:</strong> Coordinates Web Vibration API (mobile tactile patterns) with red/cyan chromatic screen-shake and sub-bass transients.</li>
+                <li><strong>Design Language:</strong> Advanced CSS glassmorphic panel cutouts, CRT monitor vignette curves, and vertical laser scanline sweeps.</li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Info modal for detailed project presentation -->
+    <div id="info-modal">
+      <div class="modal-content hud-interactive">
+        <h3>System Architecture & Technical Stack</h3>
+        <p>Aether Resonance showcases several advanced browser features implemented natively without heavy framework wrappers:</p>
+        <ul>
+          <li><strong>Web Audio Synthesizer:</strong> Dynamic generation of synthesiser voices. Custom ADSR envelope mapping, high-resonance filter sweeps, bandpass feedback delay lines, and a custom synthetic impulse response reverb algorithm.</li>
+          <li><strong>Vector Physics Engine:</strong> High-performance 2D physics running in an HTML5 canvas render loop. Simulates elastic body collisions, Newton-based gravitational orbital curves, and boundary-line segment deflections.</li>
+          <li><strong>Sensory / Haptic Loop:</strong> Unifies the Device Vibration API (for physical tactile patterns on mobile) with auditory sub-bass thuds and visual canvas aberrations, mimicking physical mass impact.</li>
+          <li><strong>Design Language:</strong> Retro Cyberpunk UI crafted with modern CSS glassmorphism, glowing CSS filter dropshadows, customized range-sliders, and responsive flex grid architectures.</li>
+        </ul>
+        <button class="btn-close-modal">DISMISS SYSTEM DATA</button>
+      </div>
+    </div>
+
+    <!-- Application Script entry point -->
+  </body>
+</html>
