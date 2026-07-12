@@ -3,7 +3,7 @@
 An interactive, generative audio-visual physics sandbox built in a **Retro-Cyberpunk** design language. This project explores how interactive vector physics can drive generative ambient synthesizers and multi-layer haptic responses entirely using native browser APIs.
 
 👉 **[Live Demo](http://localhost:5173/)** (with local dev server running)
-
+https://patro-subrat-dev.github.io/aether-resonance/
 ---
 
 ## 🎨 Core Features
