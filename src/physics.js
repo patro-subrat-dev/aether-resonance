@@ -11,17 +11,27 @@ export class Particle {
     this.vy = vy;
     this.radius = 3;
     this.color = color; // Expect HSL string e.g. "320" (magenta)
+    this.startHue = parseInt(color) || 180;
     this.life = 1.0;    // 1.0 down to 0.0
     this.lifeTime = lifeTime; // in seconds
-    this.history = [];  // trail history
     this.maxHistory = 10;
+    this.history = Array.from({ length: this.maxHistory }, () => ({ x: 0, y: 0 }));  // Pre-allocate to avoid GC
+    this.historyLen = 0;
   }
 
   update(dt, gravityY, friction) {
-    // Record history for motion blur trails
-    this.history.push({ x: this.x, y: this.y });
-    if (this.history.length > this.maxHistory) {
-      this.history.shift();
+    // Record history for motion blur trails (circular/shifted buffer without reallocation)
+    if (this.historyLen < this.maxHistory) {
+      this.history[this.historyLen].x = this.x;
+      this.history[this.historyLen].y = this.y;
+      this.historyLen++;
+    } else {
+      for (let j = 0; j < this.maxHistory - 1; j++) {
+        this.history[j].x = this.history[j+1].x;
+        this.history[j].y = this.history[j+1].y;
+      }
+      this.history[this.maxHistory - 1].x = this.x;
+      this.history[this.maxHistory - 1].y = this.y;
     }
 
     // Apply forces
@@ -39,13 +49,12 @@ export class Particle {
 
   draw(ctx) {
     // Dynamically calculate hue based on remaining life (shifts color over time)
-    const startHue = parseInt(this.color) || 180;
-    const currentHue = (startHue + (1.0 - this.life) * 125) % 360;
+    const currentHue = (this.startHue + (1.0 - this.life) * 125) % 360;
 
-    if (this.history.length > 1) {
+    if (this.historyLen > 1) {
       ctx.beginPath();
       ctx.moveTo(this.history[0].x, this.history[0].y);
-      for (let i = 1; i < this.history.length; i++) {
+      for (let i = 1; i < this.historyLen; i++) {
         ctx.lineTo(this.history[i].x, this.history[i].y);
       }
       ctx.strokeStyle = `hsla(${currentHue}, 95%, 60%, ${this.life * 0.45})`;
@@ -433,7 +442,9 @@ export class PhysicsEngine {
 
       // Remove dead particles
       if (p.life <= 0) {
-        this.particles.splice(i, 1);
+        // Swap with last element and pop for O(1) removal instead of O(N) splice
+        this.particles[i] = this.particles[this.particles.length - 1];
+        this.particles.pop();
         continue;
       }
 
@@ -468,16 +479,17 @@ export class PhysicsEngine {
         if (el.type === 'well') {
           const dx = el.x - p.x;
           const dy = el.y - p.y;
-          const dist = Math.hypot(dx, dy);
+          const distSq = dx * dx + dy * dy;
 
-          if (dist < el.radius) {
+          if (distSq < el.radius * el.radius) {
             // Evaporate particle inside core
             p.life = 0; // dies
             // Trigger heavy sound/haptic
             haptics.trigger('node-hit-heavy');
-          } else if (dist < 320) {
+          } else if (distSq < 102400) { // 320 squared
+            const dist = Math.sqrt(distSq);
             // Force formula: Mass / dist^1.5 (softened gravity)
-            const force = el.mass / (Math.pow(dist, 1.5) + 50);
+            const force = el.mass / (dist * Math.sqrt(dist) + 50);
             p.vx += (dx / dist) * force * dt;
             p.vy += (dy / dist) * force * dt;
           }
@@ -489,9 +501,11 @@ export class PhysicsEngine {
         if (el.type === 'bouncer') {
           const dx = p.x - el.x;
           const dy = p.y - el.y;
-          const dist = Math.hypot(dx, dy);
+          const distSq = dx * dx + dy * dy;
+          const minDist = el.radius + p.radius;
 
-          if (dist < el.radius + p.radius) {
+          if (distSq < minDist * minDist) {
+            const dist = Math.sqrt(distSq);
             // Collision normal
             const nx = dx / dist;
             const ny = dy / dist;
