@@ -1,8 +1,23 @@
 {
-  "name": "project--",
-  "version": "0.0.0",
-  "private": true,
+  "name": "@patro-subrat-dev/aether",
+  "version": "2.0.6",
+  "description": "A cyberpunk audio-visual physics sandbox for the web.",
   "type": "module",
+  "files": [
+    "src",
+    "public",
+    "index.html",
+    "README.md",
+    "vite.config.js"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/patro-subrat-dev/aether-resonance.git"
+  },
+  "bugs": {
+    "url": "https://github.com/patro-subrat-dev/aether-resonance/issues"
+  },
+  "homepage": "https://github.com/patro-subrat-dev/aether-resonance#readme",
   "scripts": {
     "dev": "vite",
     "build": "vite build",
