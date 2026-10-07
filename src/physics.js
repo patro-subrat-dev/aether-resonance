@@ -425,13 +425,15 @@ export class PhysicsEngine {
     // Avoid giant physics jumps if tab goes inactive
     if (dt > 0.1) dt = 0.1;
 
-    // Update emitters first to spawn particles
+    // Update simulation elements. Emitters require the spawn callback, while
+    // every other element only needs its regular per-frame update.
     this.elements.forEach(el => {
-      el.update(dt);
       if (el.type === 'emitter') {
         el.update(dt, (px, py, pvx, pvy, phue) => {
           this.addParticle(px, py, pvx, pvy, phue);
         });
+      } else {
+        el.update(dt);
       }
     });
 
